@@ -1,0 +1,7 @@
+language: python
+dist: xenial
+install:
+  - pip install -r requirements-test.txt
+  - pip install flake8
+script:
+  - flake8 *.py
