@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 
+
 class RealmRanks:
-    def __init__(self, rank=False):
+    def __init__(self, rank=False, rp=False):
         self.realmrank = rank
+        self.current_rp = rp
+
         self.r1l1 = 0
         self.r1l2 = 25
         self.r1l3 = 125
@@ -159,7 +162,8 @@ class RealmRanks:
 
         self.rank = rank
         self.level = level
-        return "r{}l{}".format(rank, level)
+
+        return getattr(self, "r{}l{}".format(rank, level))
 
     def get_rank(self):
         return self.rank
@@ -167,7 +171,7 @@ class RealmRanks:
     def get_level(self):
         return self.level
 
-    def next_level(self):
+    def next_level(self, pretty=False):
         rank = self.rank
         level = self.level
 
@@ -179,16 +183,14 @@ class RealmRanks:
             level = 0
             rank = rank + 1
 
-        print("Next: {}L{}".format(rank, level))
-        print("RP for next level: {}".format(
-            getattr(self, "r{}l{}".format(rank, level))
-        ))
+        next_level_pretty = "r{}l{}".format(rank, level)
+        next_level = getattr(self, next_level_pretty)
+        if pretty:
+            return next_level_pretty.upper()
+        else:
+            return "{:,}".format(next_level - self.current_rp)
 
-        print("RP to next level: {}".format(
-            (getattr(self, "r{}l{}".format(rank, level)) - getattr(self, self.get_realmrank()))
-        ))
-
-    def next_rank(self):
+    def next_rank(self, pretty=False):
         level = self.get_level()
         rank = self.get_rank()
 
@@ -198,13 +200,24 @@ class RealmRanks:
             rank = rank + 1
         level = 0
 
-        print("Next: {}L{}".format(rank, level))
-        print("RP for next rank: {}".format((getattr(self, "r{}l{}".format(rank, level)))))
-        print("RP to next rank: {}".format((getattr(self, "r{}l{}".format(rank, level))) - getattr(self, self.get_realmrank())))
+        next_rank_pretty = "r{}l{}".format(rank, level)
+        next_rank = getattr(self, next_rank_pretty)
+        if pretty:
+            return next_rank_pretty.upper()
+        else:
+            return "{:,}".format(next_rank - self.current_rp)
+
+    def set_rp(self, rp):
+        self.current_rp = rp
+
 
 if __name__ == "__main__":
 
     rr = RealmRanks("1L2")
-    print("{}: {}".format(rr.realmrank, getattr(rr, "{}".format(rr.get_realmrank()))))
+    rr.set_rp(27)
+    print("Current: {}: {}".format(
+        rr.realmrank,
+        getattr(rr, "{}".format(rr.get_realmrank()))
+    ))
     rr.next_level()
     rr.next_rank()
