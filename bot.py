@@ -45,8 +45,9 @@ async def on_message(message):
                 p.rp_all_time_amount,
                 p.player_rr,
                 p.player_pretty_rr),
-            value="Server: #{} - Realm: #{} - {}: #{}".format(
+            value="Server: #{} - {}: #{} - {}: #{}".format(
                 p.rp_all_time_server,
+                p.player_realm,
                 p.rp_all_time_realm,
                 p.player_class,
                 p.rp_all_time_class),
@@ -55,8 +56,9 @@ async def on_message(message):
         embed.add_field(
             name="Last Week: {}".format(
                 p.rp_last_week_amount),
-            value="Server: #{} - Realm: #{} - {}: #{}".format(
+            value="Server: #{} - {}: #{} - {}: #{}".format(
                 p.rp_last_week_server,
+                p.player_realm,
                 p.rp_last_week_realm,
                 p.player_class,
                 p.rp_last_week_class),
@@ -65,8 +67,9 @@ async def on_message(message):
         embed.add_field(
             name="This Week: {}".format(
                 p.rp_this_week_amount),
-            value="Server: #{} - Realm: #{} - {}: #{}".format(
+            value="Server: #{} - {}: #{} - {}: #{}".format(
                 p.rp_this_week_server,
+                p.player_realm,
                 p.rp_this_week_realm,
                 p.player_class,
                 p.rp_this_week_class),
@@ -75,8 +78,9 @@ async def on_message(message):
         embed.add_field(
             name="Last 48 hours: {}".format(
                 p.rp_last_48h_amount),
-            value="Server: #{} - Realm: #{} - {}: #{}".format(
+            value="Server: #{} - {}: #{} - {}: #{}".format(
                 p.rp_last_48h_server,
+                p.player_realm,
                 p.rp_last_48h_realm,
                 p.player_class,
                 p.rp_last_48h_class),
