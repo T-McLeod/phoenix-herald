@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import discord
-from phoenix import PhoenixParser
+from phoenix.PhoenixParser import PhoenixParser
+from phoenix.RealmRanks import RealmRanks
 import os
 import sys
 
@@ -28,6 +29,10 @@ async def on_message(message):
     if message.content.startswith("!who"):
         char = PhoenixParser(message.content.replace("!who ", ""))
         p = char.info
+
+        rr = RealmRanks(p.player_rr,
+                        int(p.rp_all_time_amount.replace(",", "")))
+
         embed = discord.Embed(
             title="{}, ({} {})".format(
                 p.player_name,
@@ -45,7 +50,12 @@ async def on_message(message):
                 p.rp_all_time_amount,
                 p.player_rr,
                 p.player_pretty_rr),
-            value="Server: #{} - {}: #{} - {}: #{}".format(
+            value="Left to, {}: {}, {}: {}\n\
+Server: #{} - {}: #{} - {}: #{}".format(
+                rr.next_rank(pretty=True),
+                rr.next_rank(),
+                rr.next_level(pretty=True),
+                rr.next_level(),
                 p.rp_all_time_server,
                 p.player_realm,
                 p.rp_all_time_realm,

@@ -276,22 +276,27 @@ class PhoenixParser:
 
 if __name__ == "__main__":
     try:
+        from RealmRanks import RealmRanks
         char = PhoenixParser("Gorbys")
         p = char.info
+        r = RealmRanks(p.player_rr, int(p.rp_all_time_amount.replace(",", "")))
 
         tot = "Total: {} - {} ({}) Server: #{} - {}: #{} - {}: #{}".format(
             p.rp_all_time_amount, p.player_rr, p.player_pretty_rr,
             p.rp_all_time_server, p.player_realm, p.rp_all_time_realm,
             p.player_class, p.rp_all_time_class)
 
+        to_next = "Next RealmRank: {}, Next RealmLevel: {}".format(
+            r.next_rank(), r.next_level())
+
         last_week = "Last Week: {} Server: #{} - {}: #{} - {}: #{}".format(
             p.rp_last_week_amount, p.rp_last_week_server, p.player_realm,
             p.rp_last_week_realm, p.player_class, p.rp_last_week_class)
 
-        output = "{}, ({} {}) Guild: {} - Level: {} {} {} Updated: {}".format(
+        out = "{}, ({} {}) Guild: {} - Level: {} {} {} {} Updated: {}".format(
             p.player_name, p.player_race, p.player_class, p.player_guild,
-            p.player_level, tot, last_week, p.last_updated)
+            p.player_level, tot, to_next, last_week, p.last_updated)
 
-        print(output)
+        print(out)
     except Exception as e:
         print("Error: {}".format(e))
