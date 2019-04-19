@@ -63,7 +63,7 @@ class RealmRanks:
         self.r6l0 = 1010625
         self.r6l1 = 1073125
         self.r6l2 = 1138150
-        self.r6l3 = 1138150
+        self.r6l3 = 1205750
         self.r6l4 = 1275975
         self.r6l5 = 1348875
         self.r6l6 = 1424500
