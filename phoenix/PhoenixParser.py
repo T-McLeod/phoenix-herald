@@ -231,7 +231,7 @@ class PhoenixParser:
         ]
 
         hib = [
-            "Anemist",
+            "Animist",
             "Bard",
             "Blademaster",
             "Champion",
