@@ -99,7 +99,7 @@ async def on_message(message):
 
             embed.set_footer(text="Updated: {}".format(p.last_updated))
             await message.channel.send(embed=embed)
-        except:
+        except Exception:
             embed = discord.Embed(
                 title="Unable to find player {}".format(
                         message.content.replace("!who ", "")),
