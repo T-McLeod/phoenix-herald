@@ -242,7 +242,9 @@ class PhoenixParser:
             "Druid",
             "Eldritch",
             "Enchanter",
+            "Enchantress",
             "Hero",
+            "Heroine",
             "Mentalist",
             "Nightshade",
             "Ranger",
@@ -252,6 +254,7 @@ class PhoenixParser:
 
         alb = [
             "Armsman",
+            "Armswoman",
             "Cabalist",
             "Cleric",
             "Friar",
@@ -263,6 +266,7 @@ class PhoenixParser:
             "Reaver",
             "Scout",
             "Sorcerer",
+            "Sorceress",
             "Theurgist",
             "Wizard",
         ]
