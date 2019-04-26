@@ -130,16 +130,20 @@ class PhoenixParser:
         self.mapping[114] = "kills_by_realm_last_48h_mid"
         self.mapping[115] = "kills_by_realm_last_48h_hib"
 
-        self.get_html_from_herald()
-        self.get_player_info()
-        self.fix_player_data()
-        self.get_all_stats()
-        self.get_last_updated()
-        self.info['player_url'] = "{}/{}".format(
-            self.player_url, urllib.parse.quote_plus(self.info['player_name']))
-        self.info['guild_url'] = "{}/{}".format(
-            self.guild_url, urllib.parse.quote_plus(self.info['player_guild']))
-        self.info = self.info_to_object()
+        try:
+            self.get_html_from_herald()
+            self.get_player_info()
+            self.fix_player_data()
+            self.get_all_stats()
+            self.get_last_updated()
+            self.info['player_url'] = "{}/{}".format(
+                self.player_url, urllib.parse.quote_plus(self.info['player_name']))
+            self.info['guild_url'] = "{}/{}".format(
+                self.guild_url, urllib.parse.quote_plus(self.info['player_guild']))
+            self.info = self.info_to_object()
+        except:
+            raise Exception("Unable to parse data for: {}".format(
+                self.search_for))
 
     def get_html_from_herald(self):
         url = "{}/{}".format(self.player_url, self.search_for)
