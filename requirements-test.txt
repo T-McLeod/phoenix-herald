@@ -3,3 +3,5 @@ discord.py==1.0.1
 requests
 responses
 urllib3
+nose
+flake8
