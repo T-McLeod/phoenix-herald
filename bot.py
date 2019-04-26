@@ -103,7 +103,7 @@ async def on_message(message):
             embed = discord.Embed(
                 title="Unable to find player {}".format(
                         message.content.replace("!who ", "")),
-                description="perhaps not exist, or misspelled?",
+                description="This player does not exist or was misspelled",
                 color=16312092
             )
             await message.channel.send(embed=embed)
