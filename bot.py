@@ -4,6 +4,9 @@ from phoenix.PhoenixParser import PhoenixParser
 from phoenix.RealmRanks import RealmRanks
 import os
 import sys
+import re
+
+pattern = re.compile("^[!,?]{1}who ([a-z0-9]+)$")
 
 discord_token = os.environ.get('DISCORD_TOKEN')
 if not discord_token:
@@ -26,9 +29,13 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.startswith("!who"):
+    m = re.match(pattern, message.content.lower())
+
+    if m:
+        search_for = m.group(1)
+
         try:
-            char = PhoenixParser(message.content.replace("!who ", ""))
+            char = PhoenixParser(search_for)
             p = char.info
 
             rr = RealmRanks(p.player_rr,
@@ -101,8 +108,7 @@ async def on_message(message):
             await message.channel.send(embed=embed)
         except Exception:
             embed = discord.Embed(
-                title="Unable to find player {}".format(
-                        message.content.replace("!who ", "")),
+                title="Unable to find player {}".format(search_for),
                 description="This player does not exist or was misspelled",
                 color=16312092
             )
