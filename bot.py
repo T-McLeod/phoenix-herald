@@ -9,6 +9,12 @@ import re
 pattern = re.compile("^[!,?]{1}who ([a-z0-9]+)$")
 
 discord_token = os.environ.get('DISCORD_TOKEN')
+discord_hosted_by = os.environ.get('DISCORD_HOSTED_BY')
+
+if not discord_token:
+    print("Missing ENV variable DISCORD_TOKEN, please set and try again")
+    sys.exit(1)
+
 if not discord_token:
     print("Missing ENV variable DISCORD_TOKEN, please set and try again")
     sys.exit(1)
@@ -28,6 +34,17 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
+
+    if message.content == '!server':
+        embed = discord.Embed(
+                title="Guilds Using Phoenix-Bot",
+                description="hosted by {}".format(discord_hosted_by),
+                color=16312092)
+
+        for guild in client.guilds:
+            embed.add_field(name=guild.name, value=guild.owner, inline=False)
+
+        await message.channel.send(embed=embed)
 
     m = re.match(pattern, message.content.lower())
 
