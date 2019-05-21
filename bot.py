@@ -11,8 +11,8 @@ pattern = re.compile("^[!,?]{1}who ([a-z0-9]+)$")
 discord_token = os.environ.get('DISCORD_TOKEN')
 discord_hosted_by = os.environ.get('DISCORD_HOSTED_BY')
 
-if not discord_token:
-    print("Missing ENV variable DISCORD_TOKEN, please set and try again")
+if not discord_hosted_by:
+    print("Missing ENV variable DISCORD_HOSTED_BY, please set and try again")
     sys.exit(1)
 
 if not discord_token:
@@ -37,9 +37,9 @@ async def on_message(message):
 
     if message.content == '!server':
         embed = discord.Embed(
-                title="Guilds Using Phoenix-Bot",
-                description="hosted by {}".format(discord_hosted_by),
-                color=16312092)
+            title="Guilds Using Phoenix-Bot",
+            description="hosted by {}".format(discord_hosted_by),
+            color=16312092)
 
         for guild in client.guilds:
             embed.add_field(name=guild.name, value=guild.owner, inline=False)
@@ -76,7 +76,7 @@ async def on_message(message):
                     p.player_rr,
                     p.player_pretty_rr),
                 value="Left to, {}: {}, {}: {}\n\
-    Server: #{} - {}: #{} - {}: #{}".format(
+                Server: #{} - {}: #{} - {}: #{}".format(
                     rr.next_rank(pretty=True),
                     rr.next_rank(),
                     rr.next_level(pretty=True),
