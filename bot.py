@@ -43,7 +43,9 @@ async def on_ready():
 @commands.check(is_owner)
 async def info(ctx):
     embed = discord.Embed(
-        title="Guilds Using Phoenix-Bot",
+        title="{} Guild(s) Using {}".format(
+            len(bot.guilds),
+            bot.user.name),
         description="hosted by {}".format(discord_hosted_by),
         color=16312092)
 
