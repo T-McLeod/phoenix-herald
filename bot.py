@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 import discord
 from discord.ext import commands
+from DiscordBotsOrgAPI import DiscordBotsOrgAPI
 from phoenix.PhoenixParser import PhoenixParser
 from phoenix.RealmRanks import RealmRanks
 import os
 import sys
+import logging
 
 discord_owner_id = int(os.environ.get('DISCORD_OWNER_ID'))
 discord_token = os.environ.get('DISCORD_TOKEN')
+discordbots_token = os.environ.get('DISCORDBOTS_TOKEN')
 discord_hosted_by = os.environ.get('DISCORD_HOSTED_BY')
 
 if not discord_owner_id:
@@ -26,6 +29,13 @@ bot = commands.Bot(
     command_prefix='!',
     case_insensitive=True
 )
+
+
+def setup(bot):
+    global logger
+    logger = logging.getLogger('bot')
+    if discordbots_token:
+        bot.add_cog(DiscordBotsOrgAPI(bot, discordbots_token))
 
 
 async def is_owner(ctx):
