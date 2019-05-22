@@ -28,6 +28,10 @@ bot = commands.Bot(
 )
 
 
+async def is_owner(ctx):
+    return ctx.author.id == discord_owner_id
+
+
 @bot.event
 async def on_ready():
     print('Discord.py Version: {}'.format(discord.__version__))
@@ -36,10 +40,8 @@ async def on_ready():
 
 
 @bot.command()
+@commands.check(is_owner)
 async def info(ctx):
-    if discord_owner_id != ctx.message.author.id:
-        return
-
     embed = discord.Embed(
         title="Guilds Using Phoenix-Bot",
         description="hosted by {}".format(discord_hosted_by),
