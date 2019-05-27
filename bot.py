@@ -83,8 +83,8 @@ async def who(ctx, player):
                 p.rp_all_time_amount,
                 p.player_rr,
                 p.player_pretty_rr),
-            value="Left to, {}: {}, {}: {}\n\
-            Server: #{} - {}: #{} - {}: #{}".format(
+            value="Left to, {}: {}, {}: {}\nServer: #{} - {}: #{} - {}: #{}"
+            .format(
                 rr.next_rank(pretty=True),
                 rr.next_rank(),
                 rr.next_level(pretty=True),
