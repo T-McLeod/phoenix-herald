@@ -50,7 +50,7 @@ async def info(ctx):
         color=16312092)
 
     for guild in bot.guilds:
-        embed.add_field(name=guild.name,
+        embed.add_field(name="{} ({})".format(guild.name, guild.id),
                         value=guild.owner,
                         inline=False)
 
