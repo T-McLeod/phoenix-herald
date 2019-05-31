@@ -23,7 +23,7 @@ if not discord_token:
     print("Missing ENV variable DISCORD_TOKEN, please set and try again")
     sys.exit(1)
 
-conn = sqlite3.connect('./data/phoenix-herald.sqlite')
+conn = sqlite3.connect('data{}phoenix-herald.sqlite'.format(os.sep))
 
 bot = commands.Bot(
     command_prefix='!',
