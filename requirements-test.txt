@@ -1,7 +1,7 @@
 beautifulsoup4
 discord.py==1.1.1
+flake8
+nose
 requests
 responses
 urllib3
-nose
-flake8

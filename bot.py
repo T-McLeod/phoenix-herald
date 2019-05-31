@@ -5,6 +5,7 @@ from phoenix.PhoenixParser import PhoenixParser
 from phoenix.RealmRanks import RealmRanks
 import os
 import sys
+import sqlite3
 
 discord_owner_id = int(os.environ.get('DISCORD_OWNER_ID'))
 discord_token = os.environ.get('DISCORD_TOKEN')
@@ -22,10 +23,58 @@ if not discord_token:
     print("Missing ENV variable DISCORD_TOKEN, please set and try again")
     sys.exit(1)
 
+conn = sqlite3.connect('./data/phoenix-herald.sqlite')
+
 bot = commands.Bot(
     command_prefix='!',
     case_insensitive=True
 )
+
+
+async def clean_name(some_var):
+    return ''.join(char for char in some_var if char.isalnum())
+
+
+async def db_create_schema():
+    global conn
+    c = conn.cursor()
+    sql = " CREATE TABLE IF NOT EXISTS me( \
+              userId int not null, \
+              playerName varchar(255) not null \
+            );"
+    c.execute(sql)
+    conn.commit()
+
+
+async def db_delete_char(player_id, char):
+    global conn
+    c = conn.cursor()
+    sql = "DELETE FROM me WHERE userId={} AND playerName='{}';".format(
+        player_id, await clean_name(char))
+    c.execute(sql)
+    conn.commit()
+
+
+async def db_insert_char(player_id, char):
+    global conn
+    c = conn.cursor()
+    sql = "INSERT INTO me (userId, playerName) VALUES ({}, '{}');".format(
+        player_id, await clean_name(char))
+    c.execute(sql)
+    conn.commit()
+
+
+async def db_get_chars(player_id):
+    global conn
+    c = conn.cursor()
+    sql = "SELECT playerName \
+            FROM me \
+            WHERE userId={} \
+            ORDER BY playerName ASC;".format(player_id)
+    c.execute(sql)
+    all_rows = c.fetchall()
+
+    return [x[0] for x in all_rows]
 
 
 async def is_owner(ctx):
@@ -37,6 +86,93 @@ async def on_ready():
     print('Discord.py Version: {}'.format(discord.__version__))
     print("I'm known as:       {}".format(bot.user.name))
     print("My masters ID is:   {}".format(discord_owner_id))
+    print("Creating database schema")
+    await db_create_schema()
+
+
+@bot.command(name='me')
+async def me(ctx, *args):
+    # query db and get matches based on your id
+    # we always want that list due to add/delete functions.
+    in_db = await db_get_chars(ctx.author.id)
+
+    if not args:
+        if len(in_db) == 0:
+            await ctx.send(
+                "No saved players for your id, please use '!me add <name>'")
+            return
+        embed = discord.Embed(
+            title="{} characters".format(
+                ctx.author.name.capitalize()), color=16312092)
+
+        for char in in_db:
+            try:
+                player = PhoenixParser(char)
+                p = player.info
+
+                embed.add_field(
+                    name="{} (Lvl {} {} {})".format(
+                        p.player_name.capitalize(),
+                        p.player_level,
+                        p.player_race,
+                        p.player_class),
+                    value="Total: {} - {} ({})".format(
+                        p.rp_all_time_amount,
+                        p.player_rr,
+                        p.player_pretty_rr),
+                    inline=False)
+            except Exception:
+                pass
+        await ctx.send(embed=embed)
+    else:
+        if args[0].lower() == "add" and len(args) > 1:
+            # Check if player exist by query
+            # IF exist, check if not alread in db
+            # If in db, just skip, else add
+            characters = list(args)
+            characters.pop(0)
+            saved = []
+            alread_added = []
+
+            try:
+                for char in characters:
+                    char = char.capitalize()
+                    if char not in in_db:
+                        player = PhoenixParser(char)
+                        saved.append(char)
+                        await db_insert_char(ctx.author.id, char)
+                    else:
+                        alread_added.append(char)
+            except Exception:
+                pass
+
+            if len(saved) > 0:
+                await ctx.send("Saved: {}".format(', '.join(saved)))
+                if len(alread_added) > 0:
+                    await ctx.send("Already saved: {}".format(
+                        ', '.join(alread_added)))
+            else:
+                if len(alread_added) > 0:
+                    await ctx.send("Already saved: {}".format(
+                        ', '.join(alread_added)))
+                else:
+                    await ctx.send("No valid players found")
+        elif args[0].lower() == "del" and len(args) > 1:
+            # check if you have the player in your db list
+            # If in db, delete record
+            characters = list(args)
+            characters.pop(0)
+            deleted = []
+            for char in characters:
+                char = char.capitalize()
+                if char in in_db:
+                    await db_delete_char(ctx.author.id, char)
+                    deleted.append(char)
+            if len(deleted) > 0:
+                await ctx.send("Removing: {}".format(', '.join(deleted)))
+            else:
+                await ctx.send("Unable to delete anything")
+    return
 
 
 @bot.command()
