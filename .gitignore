@@ -1,0 +1,6 @@
+update-docker-bot.sh
+test.py
+**/__pycache__
+**/.*.swp
+run-dev-bot.sh
+data
