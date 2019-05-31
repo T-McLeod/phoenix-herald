@@ -4,4 +4,5 @@ RUN mkdir -p /app
 COPY bot.py requirements.txt /app/
 COPY phoenix /app/phoenix
 RUN pip3 install -r /app/requirements.txt
+WORKDIR /app
 ENTRYPOINT /app/bot.py
