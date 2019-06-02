@@ -110,7 +110,6 @@ async def show_me(ctx, in_db, sort_order=None):
         except Exception:
             pass
     if sort_order == "level":
-        print("sorting level")
         player_list = sorted(
             player_list, key=lambda k: k['level'],
             reverse=True)
@@ -167,7 +166,7 @@ async def me(ctx, *args):
                 sort_order.pop(0)
                 await show_me(ctx, in_db, sort_order=sort_order[0])
             else:
-                await ctx.send("sort argument: name,level, rp, realm")
+                await ctx.send("sort argument: name, level, rp, realm")
             return
         if args[0].lower() == "add" and len(args) > 1:
             # Check if player exist by query
