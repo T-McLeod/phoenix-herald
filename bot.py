@@ -81,6 +81,68 @@ async def is_owner(ctx):
     return ctx.author.id == discord_owner_id
 
 
+async def show_me(ctx, in_db, sort_order=None):
+    if len(in_db) == 0:
+        await ctx.send(
+            "No saved players for your id, please use '!me add <name>'")
+        return
+    embed = discord.Embed(
+        title="{} characters".format(
+            ctx.author.name.capitalize()), color=16312092)
+
+    player_list = []
+    for char in in_db:
+        try:
+            player = PhoenixParser(char)
+            p = player.info
+            player_dict = {
+                'name': p.player_name.capitalize(),
+                'level': int(p.player_level),
+                'race': p.player_race,
+                'realm': p.player_realm,
+                'class': p.player_class,
+                'rp': p.rp_all_time_amount,
+                'rp_as_int': int(p.rp_all_time_amount.replace(',', '')),
+                'rr': p.player_rr,
+                'rr_name': p.player_pretty_rr
+            }
+            player_list.append(player_dict)
+        except Exception:
+            pass
+    if sort_order == "level":
+        print("sorting level")
+        player_list = sorted(
+            player_list, key=lambda k: k['level'],
+            reverse=True)
+    elif sort_order == "realm":
+        player_list = sorted(
+            player_list, key=lambda k: k['realm'])
+    elif sort_order == "rp":
+        player_list = sorted(
+            player_list, key=lambda k: k['rp_as_int'],
+            reverse=True)
+    elif sort_order == "name":
+        player_list = sorted(
+            player_list, key=lambda k: k['name'])
+    else:
+        player_list = sorted(
+            player_list, key=lambda k: k['name'])
+
+    for x in player_list:
+        embed.add_field(
+            name="{} (Lvl {} {} {})".format(
+                x['name'],
+                x['level'],
+                x['race'],
+                x['class']),
+            value="Total: {} - {} ({})".format(
+                x['rp'],
+                x['rr'],
+                x['rr_name']),
+            inline=False)
+    await ctx.send(embed=embed)
+
+
 @bot.event
 async def on_ready():
     print('Discord.py Version: {}'.format(discord.__version__))
@@ -97,34 +159,16 @@ async def me(ctx, *args):
     in_db = await db_get_chars(ctx.author.id)
 
     if not args:
-        if len(in_db) == 0:
-            await ctx.send(
-                "No saved players for your id, please use '!me add <name>'")
-            return
-        embed = discord.Embed(
-            title="{} characters".format(
-                ctx.author.name.capitalize()), color=16312092)
-
-        for char in in_db:
-            try:
-                player = PhoenixParser(char)
-                p = player.info
-
-                embed.add_field(
-                    name="{} (Lvl {} {} {})".format(
-                        p.player_name.capitalize(),
-                        p.player_level,
-                        p.player_race,
-                        p.player_class),
-                    value="Total: {} - {} ({})".format(
-                        p.rp_all_time_amount,
-                        p.player_rr,
-                        p.player_pretty_rr),
-                    inline=False)
-            except Exception:
-                pass
-        await ctx.send(embed=embed)
+        await show_me(ctx, in_db, sort_order=None)
     else:
+        if args[0].lower() == "sort":
+            if len(args) > 1:
+                sort_order = list(args)
+                sort_order.pop(0)
+                await show_me(ctx, in_db, sort_order=sort_order[0])
+            else:
+                await ctx.send("sort argument: name,level, rp, realm")
+            return
         if args[0].lower() == "add" and len(args) > 1:
             # Check if player exist by query
             # IF exist, check if not alread in db
@@ -138,7 +182,7 @@ async def me(ctx, *args):
                 for char in characters:
                     char = char.capitalize()
                     if char not in in_db:
-                        player = PhoenixParser(char)
+                        PhoenixParser(char)
                         saved.append(char)
                         await db_insert_char(ctx.author.id, char)
                     else:
