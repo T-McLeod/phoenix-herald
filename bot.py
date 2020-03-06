@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 from phoenix.PhoenixParser import PhoenixParser
 from phoenix.RealmRanks import RealmRanks
+from datetime import datetime
 import os
 import sys
 import sqlite3
@@ -35,12 +36,26 @@ async def clean_name(some_var):
     return ''.join(char for char in some_var if char.isalnum())
 
 
-async def db_create_schema():
+async def db_create_schema_me():
     global conn
     c = conn.cursor()
     sql = " CREATE TABLE IF NOT EXISTS me( \
               userId int not null, \
               playerName varchar(255) not null \
+            );"
+    c.execute(sql)
+    conn.commit()
+
+
+async def db_create_schema_commands():
+    global conn
+    c = conn.cursor()
+    sql = " CREATE TABLE IF NOT EXISTS commands( \
+              timestamp int not null, \
+              id int not null, \
+              guild varchar(255) not null, \
+              command varchar(255) not null, \
+              args varchar(255) not null \
             );"
     c.execute(sql)
     conn.commit()
@@ -62,6 +77,29 @@ async def db_insert_char(player_id, char):
         player_id, await clean_name(char))
     c.execute(sql)
     conn.commit()
+
+
+async def db_insert_command(player_id, guild, command, args):
+    global conn
+    c = conn.cursor()
+
+    now = datetime.now()
+    timestamp = datetime.timestamp(now)
+    sql = """INSERT INTO
+                commands (timestamp, id, guild, command, args)
+                VALUES ({}, {}, '{}', '{}', '{}');""".format(
+                    timestamp, player_id, guild, command, args)
+    c.execute(sql)
+    conn.commit()
+
+
+async def db_get_command_count(command):
+    global conn
+    c = conn.cursor()
+    sql = "SELECT COUNT(*) FROM commands WHERE command='{}';".format(command)
+    c.execute(sql)
+    all_rows = c.fetchall()
+    return [x[0] for x in all_rows][0]
 
 
 async def db_get_chars(player_id):
@@ -153,7 +191,9 @@ async def on_ready():
     print("I'm known as:       {}".format(bot.user.name))
     print("My masters ID is:   {}".format(discord_owner_id))
     print("Creating database schema")
-    await db_create_schema()
+    await db_create_schema_me()
+    await db_create_schema_commands()
+    print("Ready to operate")
 
 
 @bot.command(name='me')
@@ -163,14 +203,19 @@ async def me(ctx, *args):
     in_db = await db_get_chars(ctx.author.id)
 
     if not args:
+        await db_insert_command(ctx.author.id, ctx.guild, "!me", "")
         await show_me(ctx, in_db, sort_order=None)
     else:
         if args[0].lower() == "sort":
             if len(args) > 1:
                 sort_order = list(args)
                 sort_order.pop(0)
+                await db_insert_command(
+                    ctx.author.id, ctx.guild, "!me", "sort")
                 await show_me(ctx, in_db, sort_order=sort_order[0])
             else:
+                await db_insert_command(
+                    ctx.author.id, ctx.guild, "!me", "")
                 await ctx.send("sort argument: name, level, rp, realm")
             return
         if args[0].lower() == "add" and len(args) > 1:
@@ -205,6 +250,7 @@ async def me(ctx, *args):
                         ', '.join(alread_added)))
                 else:
                     await ctx.send("No valid players found")
+            await db_insert_command(ctx.author.id, ctx.guild, "!me", "add")
         elif args[0].lower() == "del" and len(args) > 1:
             # check if you have the player in your db list
             # If in db, delete record
@@ -220,6 +266,7 @@ async def me(ctx, *args):
                 await ctx.send("Removing: {}".format(', '.join(deleted)))
             else:
                 await ctx.send("Unable to delete anything")
+            await db_insert_command(ctx.author.id, ctx.guild, "!me", "del")
     return
 
 
@@ -233,6 +280,22 @@ async def info(ctx):
         description="hosted by {}".format(discord_hosted_by),
         color=16312092)
 
+    embed.add_field(
+        name="!info issued",
+        value=await db_get_command_count("!info"),
+        inline=False)
+
+    embed.add_field(
+        name="!me issued",
+        value=await db_get_command_count("!me"),
+        inline=False)
+
+    embed.add_field(
+        name="!who issued",
+        value=await db_get_command_count("!who"),
+        inline=False)
+
+    await db_insert_command(ctx.author.id, ctx.guild, "!info", "")
     await ctx.send(embed=embed)
 
 
@@ -314,6 +377,7 @@ async def who(ctx, player):
             inline=False)
 
         embed.set_footer(text="Updated: {}".format(p.last_updated))
+        await db_insert_command(ctx.author.id, ctx.guild, "!who", player)
         await ctx.send(embed=embed)
     except Exception:
         embed = discord.Embed(
@@ -321,6 +385,7 @@ async def who(ctx, player):
             description="This player does not exist or was misspelled",
             color=16312092
         )
+        await db_insert_command(ctx.author.id, ctx.guild, "!who", player)
         await ctx.send(embed=embed)
 
 bot.run(discord_token)
