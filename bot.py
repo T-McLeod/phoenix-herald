@@ -81,14 +81,19 @@ async def is_owner(ctx):
     return ctx.author.id == discord_owner_id
 
 
+def _id(username):
+    # remove all non-digits and return the userid
+    import re
+    return re.sub("[^0-9]", "", username)
+
+
 async def show_me(ctx, in_db, sort_order=None):
     if len(in_db) == 0:
         await ctx.send(
-            "No saved players for your id, please use '!me add <name>'")
+            "No saved players, please use '!me add <name>'")
         return
     embed = discord.Embed(
-        title="{} characters".format(
-            ctx.author.name.capitalize()), color=16312092)
+        title="Characters", color=16312092)
 
     player_list = []
     for char in in_db:
@@ -233,6 +238,11 @@ async def info(ctx):
 
 @bot.command()
 async def who(ctx, player):
+    if player.startswith("<@"):
+        in_db = await db_get_chars(_id(player))
+        await show_me(ctx, in_db, sort_order=None)
+        return
+
     try:
         char = PhoenixParser(player)
         p = char.info
